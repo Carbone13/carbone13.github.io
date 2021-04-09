@@ -1,6 +1,6 @@
 ---
 layout: page
-title: "404: Page not found"
+title: "On dirait que vous êtes perdu... 404"
 permalink: /404.html
 
 redirect_from:
@@ -12,10 +12,11 @@ dynamic_title: true
 ---
 
 <div class="lead">
-  <p>Sorry, we've misplaced that URL or it's pointing to something that doesn't exist. </p>
+  <img src="{{ '/' | relative_url }}/assets/404/Cornifer.png">
+  <p>Désolé, il n'y a rien ici :( </p>
   <p>
-    <a href="{{ '/' | relative_url }}">Head back Home</a>
-    to try finding it again, or search for it on the
-    <a href="{{ 'archives' | relative_url }}">Archives page</a>.
+    Vous pouvez retourner à <a href="{{ '/' | relative_url }}">l'accueil</a>
+    ou allez fouiller les
+    <a href="{{ 'archives' | relative_url }}">archives</a>.
   </p>
 </div>
