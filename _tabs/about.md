@@ -1,5 +1,5 @@
 ---
-title: └ propos de moi
+title: À propos de moi
 icon: fas fa-info
 order: 4
 ---
