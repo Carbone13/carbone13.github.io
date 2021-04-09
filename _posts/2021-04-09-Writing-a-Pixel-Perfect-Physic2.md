@@ -6,92 +6,104 @@ title:  "Réaliser sa propre physique pour du Pixel Art [2/3]"
 
 ## Les acteurs
 
+Dans le précédent article, j'ai plusieurs fois parler d'Acteur, en fait un Acteur désigne une entité qui va se déplacer dans la scène
+tout en collisionant avec les autres boîtes de collisions. Par exemple Mario serait un Acteur, un Goomba aussi.
+
+Personnellement je crée une class abstraite que j'appelle Actor. Abstraite signifie qu'elle ne peux pas être utiliser comme ça, il
+faut forcément crée une deuxième classe qui en dérive pour l'utiliser. Le but ensuite, c'est de crée des fonctions dans la classe Actor
+que tout les classes qui en hérite pourront utiliser.
 
 
-Lorsqu'on souhaite réaliser un jeu en 2D sur Unity, on peut se laisse tenter par son système de Physic et de collisions.
-Malheuresement il est assez laborieux d'avoir un résultat convaincant avec, surtout lorsqu'on développe un Platformer.
-Maintenant il est toujours possible d'utiliser la fonction MovePosition() d'un rigidbody, mais le système de collision est assez strict.
-
-C'est pourquoi aujourd'hui je vais vous apprendre à réaliser vous même un système de collision.
-Ce dernier est inspiré du celébre jeu Céleste. Avant de commencer il y a quelque contrainte à prendre en compte :
-Chaque Acteur ne peut se déplacer que d'un pixel par un pixel.
-Chaque boîte de collision est forcément une AABB (**A**xis **A**ligned **B**ounding **B**ox), c'est à dire un rectangle non tourné.
-Ces boîtes de collisions ont des dimensions en pixels, pas de virgule admise.
-
-
-# Les boîtes de collisions
-Comme je viens de le dire, la seule forme que notre système va pouvoir gérer sont les rectangles.
-Il faut donc bien comprendre qu'il faut faire une croix sur les pentes ou autres forme farfelues.
-
-Pour être conforme à ses boîtes et au système en général, nos sprites vont devoir respecter certaines régles :
-- Leur pivot doit être positionner sur un pixel du sprite, et pas entre 2 pixels.
-- Leur PPU (**P**ixel **p**er **U**nit) doit être à 1, ainsi 1 pixel de notre sprite sera égal à 1 unité sur Unity.
-- Optionnel mais reccommandé pour du pixel art : Désactiver la compression ("None") et passer le Filter Mode en "Point"
-
-Maintenant passons aux choses sérieuses. Pour répresenter nos boîtes nous allons crée une classe nommée "Rectangle.cs".
-En soit je préfère l'appeler 'AABB' mais l'éditeur Unity la fait entrer en conflit avec une classe du même nom.
-Nous n'allons pas tout faire de A à Z, il existe déja une structure permettant de répresenter un carré avec des dimensions
-en pixels (rappelez vous, contraintes n°3), il s'agit de RectInt !
-
-Pour une meilleure lisibilité, j'aime ajouté 2 `Vector2Int`, un pour la taille et un pour renseigner un offset.
-Ces deux variables ne sont pas accesibles depuis d'autre script, elles sont privés mais sérialisés.
-
-J'ajoute aussi une `boolean` "Collidable" qui permet de désactiver la boîte si besoin.
+# Se déplacer pixel par pixel
+Pour que nos Acteurs se déplacent pixel par pixel, il faut stocker le mouvement de ce dernier, est dès lors qu'il est d'au moins 1 pixel,
+on déplace réellement le joueur dans la scène. Chaque Acteur possède donc une variable de type Vector2 que j'appelle remainder qui stock donc
+les déplacements. Ensuite les Acteur possèdent une fonction `Move()` qui prend en paramètre un Vector2 qui représente la distance à parcourir.
+Aussi il est important que chaque Acteur possède une boîte de collision
 ```csharp
-[SerializeField] private Vector2Int size;
-[SerializeField] private Vector2Int offset;
+protected Rectangle collider;
+protected Vector2 remainder;
 
-public bool Collidable = true;
-```
-
-Maintenant, les autres scripts doivent pouvoir récuperer un `RectInt` qui correspond à notre boite.
-Nous allons utiliser une variable avec un simple getter qui va permettre de crée ce Rect.
-Il faut aussi penser à prendre en compte la position de l'objet dans la scène.
-```csharp
-public RectInt Bounds => new RectInt(transform.position.v2i() + Offset, Size);
-```
-
-Vous remarquez que j'utilise la fonction `v2i()` sur mon Vector3, c'est une fonction que j'ai crée qui permet de convertir un
-Vector3 en Vector2Int, car rappelez vous, nous travaillons en pixel entier donc avec des nombres entiers.
-
-Pour les intéresser la voici (à mettre dans une classe statique elle aussi) :
-```csharp
-public static Vector2Int v2i (this Vector3 input)
+private void Awake ()
 {
-	return new Vector2Int(Mathf.RoundToInt(input.x), Mathf.RoundToInt(input.y));
+	collider = GetComponent<Rectangle>();
+}
+
+protected void Move (Vector2 amount)
+{
+	MoveX(amount.x);
+	MoveY(amount.y);
 }
 ```
 
-Pour terminer nos boîtes, j'aimerais ajouter une petite fonction de Debug permettant de les visualiser.
-Pour se faire, j'utilise la fonction DrawWireCube de Gizmos, qui permet de dessiner les arêtes d'un rectangle.
-Le rectangle étant donc notre RectInt "bounds"
+Ensuite chaque mouvement est divisé en 2 phase, on s'occupe d'abord de déplacement horizontalement le joueur, puis verticalement, axe par axe.
+Ces deux fonctions sont les mêmes, alors pour le tutoriel je ne vais en détailler qu'une seul (les deux fonctions seront tout de même disponible à la fin de l'article).
+Le principe est simple, on commence par ajouter la distance à parcourir dans notre remainder, on va ensuite l'arrondir à l'entier le plus proche.
+Si la valeur arrondie n'est pas zéro, alors on doit déplacer notre joueur d'un certain nombre de pixel. Noter que cette valeur peux être négative.
 ```csharp
-public void OnDrawGizmos ()
+private void MoveX (float amount)
 {
-	Gizmos.DrawWireCube(Bounds.center, new Vector2(Bounds.size.x, Bounds.size.y));
-}
-```
+	remainder.x += amount;
+	int toMove = (int) Math.Round(remainder.x);
 
-Notre classe rectangle ressemblant donc au final à ça :
-```csharp
-public class Rectangle : MonoBehaviour
-{
-	[SerializeField] private Vector2Int size;
-	[SerializeField] private Vector2Int offset;
-
-	public bool collidable = true;
-
-	public RectInt Bounds => new RectInt(transform.position.v2i() + offset, size);
-
-
-	// Editor Functions
-	public void OnDrawGizmos ()
+	if(toMove != 0)
 	{
-		Gizmos.color = Color.green;
-		Gizmos.DrawWireCube(Bounds.center, new Vector2(Bounds.size.x, Bounds.size.y));
+		remainder.x -= toMove;
+		PixelMoveX (toMove);
 	}
 }
 ```
 
-Résultat final en scène :
-![Héléna avec sa boîte de collision](/assets/pixelartphysic/HelenaWithCollider.jpg)
+Enfin, on appelle la fonction `PixelMove()`, qui prend en paramètre un int.
+Cette dernière fonction simule chaque pixel un par un au lieu de les faire en même temps.
+Cela permet de calculer les positions entre le point de départ et celui d'arrivée.
+Le principe est simple, pour chaque déplacement d'un pixel, on regarde si l'on va collisioner un objet à la "position voulue".
+Si oui on ne bouge pas, si non on déplace le transform du joueur.
+L'opération est repétée pour chaque pixel.
+```csharp
+private void PixelMoveX (int amount)
+{
+	int direction = Math.Sign(amount);
+
+	while(amount != 0)
+	{
+		Rectangle hit = First(transform.position.v2i() + Vector2.right * sign);
+
+		if(hit != null)
+		{
+			transform.position = transform.position.v2i() + Vector2.right * sign;
+		}
+		else
+		{
+			// Collision !
+			break;
+		}
+	}
+}
+```
+
+On retrouve par ailleurs la fonction v2i cité dans le premier article.
+La dernière fonction qu'il reste à élucider est la fonction First
+Elle permet de retourner le premier Rectangle touché par notre boîte à une position donnée.
+Son fonctionnement est simple, elle vérifie chacune des autres boîtes présentes dans la scène.
+On vérifie d'abord si collidable est true, et que la boîte n'est pas la notre.
+Puis, si on collisione avec, on la retourne.
+A savoir que la fonction `Overlaps()` provient de la structure RectInt.
+```csharp
+private Rectangle First (Vector2 position)
+{
+	RectInt colliderAtPosition = new RectInt(position.v2i() + collider.offset, collider.size);
+
+	foreach(Rectangle rect in Tracker.colliders)
+	{
+		if(rect.collidable && rect != collider)
+		{
+			if(colliderAtPosition.Overlaps(rect))
+			{
+				return rect;
+			}
+		}
+	}
+
+	return null;
+}
+```
