@@ -15,9 +15,9 @@ timezone: Europe/Paris
 
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # --------------------------
-title: Carbone13                        # the main title
+title: Carbone_13                        # the main title
 
-tagline: Petits articles sur Unity   # it will display as the sub-title
+tagline: Fait mu-muse avec des pixels   # it will display as the sub-title
 
 description: >-                        # used by seo meta and the atom feed
   Mini blog sur lequel je poste
