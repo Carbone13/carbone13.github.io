@@ -18,24 +18,25 @@ que tout les classes qui en hérite pourront utiliser.
 # Se déplacer pixel par pixel
 Pour que nos Acteurs se déplacent pixel par pixel, il faut stocker le mouvement de ce dernier, est dès lors qu'il est d'au moins 1 pixel,
 on déplace réellement le joueur dans la scène. Chaque Acteur possède donc une variable de type Vector2 que j'appelle remainder qui stock donc
-les déplacements. Ensuite les Acteur possèdent une fonction `Move()` qui prend en paramètre un Vector2 qui représente la distance à parcourir.
-Aussi il est important que chaque Acteur possède une boîte de collision
+les déplacements, elle est public mais je la cache dans l'éditeur grâce à HideInInspector. Ensuite les Acteur possèdent une fonction `Move()` qui prend en paramètre un Vector2 qui représente la distance à parcourir. Les deux autres arguments sont des callbacks qui sont appelé lorsqu'il y a une collision. Ils sont de type Action.
+Aussi il est important que chaque Acteur possède une boîte de collision.
 {: .text-justify}
 ```csharp
 public abstract class Actor : MonoBehaviour
 {
-	protected Rectangle collider;
-	protected Vector2 remainder;
+	public Rectangle collider;
+	[HideInInspector]
+	public Vector2 remainder;
 
 	private void Awake ()
 	{
 		collider = GetComponent<Rectangle>();
 	}
 
-	protected void Move (Vector2 amount)
+	protected void Move (Vector2 amount, Action xCallback, Action yCallback)
 	{
-		MoveX(amount.x);
-		MoveY(amount.y);
+		MoveX(amount.x, xCallback);
+		MoveY(amount.y, yCallback);
 	}
 }
 ```
@@ -45,7 +46,7 @@ Ces deux fonctions sont les mêmes, alors pour le tutoriel je ne vais en détail
 Le principe est simple, déjà on vérifie que la distance à bouger n'est pas de zéro, si c'est n'est pas le cas, on l'ajoute dans notre remainder, on va ensuite arrondir le remainder à l'entier le plus proche. Si la valeur arrondie n'est pas zéro, alors on doit déplacer notre joueur d'un certain nombre de pixel. Noter que cette valeur peux être négative.
 {: .text-justify}
 ```csharp
-private void MoveX (float amount)
+public void MoveX (float amount, Action callback)
 {
 	if(amount == 0) return;
 
@@ -55,7 +56,7 @@ private void MoveX (float amount)
 	if(toMove != 0)
 	{
 		remainder.x -= toMove;
-		PixelMoveX (toMove);
+		PixelMoveX (toMove, callback);
 	}
 }
 ```
@@ -69,7 +70,7 @@ Si l'on collisione, alors on quitte la fonction, et on remet à zéro le remaind
 L'opération est répétée pour chaque pixel (sauf s'il y a eu collision).
 {: .text-justify}
 ```csharp
-private void PixelMoveX (int amount)
+public void PixelMoveX (int amount, Action callback)
 {
 	int sign = Math.Sign(amount);
 
@@ -85,6 +86,7 @@ private void PixelMoveX (int amount)
 		{
 			// Collision !
 			remainder.x = 0;
+			callback?.Invoke();
 			break;
 		}
 	}
@@ -123,21 +125,22 @@ Voici Actor.cs dans sa version complète :
 ```csharp
 public abstract class Actor : MonoBehaviour
 {
-	protected Rectangle collider;
-	protected Vector2 remainder;
+	public Rectangle collider;
+	[HideInInspector]
+	public Vector2 remainder;
 
 	private void Awake ()
 	{
 		collider = GetComponent<Rectangle>();
 	}
 
-	protected void Move (Vector2 amount)
+	protected void Move (Vector2 amount, Action xCallback, Action yCallback)
 	{
-		MoveX(amount.x);
-		MoveY(amount.y);
+		MoveX(amount.x, xCallback);
+		MoveY(amount.y, yCallback);
 	}
 
-	private void MoveX (float amount)
+	public void MoveX (float amount, Action callback)
 	{
 		if(amount == 0) return;
 
@@ -147,11 +150,11 @@ public abstract class Actor : MonoBehaviour
 		if(toMove != 0)
 		{
 			remainder.x -= toMove;
-			PixelMoveX (toMove);
+			PixelMoveX (toMove, callback);
 		}
 	}
 
-	private void MoveY (float amount)
+	public void MoveY (float amount, Action callback)
 	{
 		if(amount == 0) return;
 
@@ -161,11 +164,11 @@ public abstract class Actor : MonoBehaviour
 		if(toMove != 0)
 		{
 			remainder.y -= toMove;
-			PixelMoveY (toMove);
+			PixelMoveY (toMove, callback);
 		}
 	}
 
-	private void PixelMoveX (int amount)
+	public void PixelMoveX (int amount, Action callback)
 	{
 		int sign = Math.Sign(amount);
 
@@ -175,18 +178,20 @@ public abstract class Actor : MonoBehaviour
 
 			if(hit == null)
 			{
+				amount -= sign;
 				transform.position = transform.position.v2i() + Vector2.right * sign;
 			}
 			else
 			{
 				// Collision !
 				remainder.x = 0;
+				callback?.Invoke();
 				break;
 			}
 		}
 	}
 
-	private void PixelMoveY (int amount)
+	public void PixelMoveY (int amount, Action callback)
 	{
 		int sign = Math.Sign(amount);
 
@@ -196,12 +201,14 @@ public abstract class Actor : MonoBehaviour
 
 			if(hit == null)
 			{
+				amount -= sign;
 				transform.position = transform.position.v2i() + Vector2.up* sign;
 			}
 			else
 			{
 				// Collision !
 				remainder.y = 0;
+				callback?.Invoke();
 				break;
 			}
 		}
@@ -242,7 +249,7 @@ public class Player : Actor
 
 		Vector2 inputs = new Vector2(xInput, yInput);
 
-		Move(inputs.normalized * MoveSpeed * Time.deltaTime);
+		Move(inputs.normalized * MoveSpeed * Time.deltaTime, null, null);
 	}
 }
 ```
@@ -252,8 +259,8 @@ Dans une fonction Update je récupère les axes Horizontal et Vertical (qui corr
 Enfin je déplacer mon joueur en fonction de mes touches (que je normalize pour transformer le tout en direction), je multiplie par ma vitesse
 et par Delta Time (voir futur article sur le delta time).
 {: .text-justify}
-D'ailleurs j'ai oublier de le préciser, mais la position des joueurs doit être en chiffre entier. Sinon les boîtes seront de toute façon alignés
-à la grille de pixel, mais les visuels seront décalés !
+Quant aux callbacks, je ne souhaite pas les utiliser alors je passe un callback null.
+Si vous calculer vous même votre velocity, il est préférable de le remettre à 0 sur l'axe correspondant à la même manière que le remainder.
 {: .text-justify}
 Résultat final sur Unity :
 ![Héléna qui coure dans tout les sens](/assets/pixelartphysic/actortest.gif)
