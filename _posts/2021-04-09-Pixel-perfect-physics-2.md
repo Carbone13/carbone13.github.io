@@ -248,5 +248,8 @@ Dans une fonction Update je récupère les axes Horizontal et Vertical (qui corr
 Enfin je déplacer mon joueur en fonction de mes touches (que je normalize pour transformer le tout en direction), je multiplie par ma vitesse
 et par Delta Time (voir futur article sur le delta time).
 {: .text-justify}
+D'ailleurs j'ai oublier de le préciser, mais la position des joueurs doit être en chiffre entier. Sinon les boîtes seront de toute façon alignés
+à la grille de pixel, mais les visuels seront décalés !
+{: .text-justify}
 Résultat final sur Unity :
 ![Héléna qui coure dans tout les sens](/assets/pixelartphysic/actortest.gif)
