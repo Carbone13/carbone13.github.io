@@ -8,16 +8,16 @@ title:  "[1/3] Réaliser sa propre physique pour du Pixel Art"
 # Intro
 
 ---
-Lorsqu'on souhaite réaliser un jeu en 2D sur Unity, on peut se laisse tenter par son système de Physic et de collisions.
+Lorsqu'on souhaite réaliser un jeu en 2D sur Unity, on peut se laisser tenter par son système de Physique et de Collisions.
 Malheureusement il est assez laborieux d'avoir un résultat convaincant avec, surtout lorsqu'on développe un Platformer.
 Maintenant il est toujours possible d'utiliser la fonction MovePosition() d'un rigidbody, mais le système de collision est assez strict.
 {: .text-justify}
 
 C'est pourquoi aujourd'hui je vais vous apprendre à réaliser vous même un système de collision.
 Ce dernier est inspiré du célèbre jeu Céleste. Avant de commencer il y a quelque contrainte à prendre en compte :
-Chaque Acteur ne peut se déplacer que d'un pixel par un pixel.
-Chaque boîte de collision est forcément une AABB (**A**xis **A**ligned **B**ounding **B**ox), c'est à dire un rectangle non tourné.
-Ces boîtes de collisions ont des dimensions en pixels, pas de virgule admise.
+- Chaque Acteur ne peut se déplacer que d'un pixel par un pixel.
+- Chaque boîte de collision est forcément une AABB (**A**xis **A**ligned **B**ounding **B**ox), c'est à dire un rectangle non tourné.
+- Les tailles des boîtes ainsi que les positions de chaque entités sont des nombres entiers.
 {: .text-justify}
 
 Les scripts complets sont disponibles à la fin de chaque articles.

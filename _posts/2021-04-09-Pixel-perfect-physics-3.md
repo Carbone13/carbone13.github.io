@@ -1,13 +1,19 @@
 ---
 layout: post
 categories: 2D Physic
-title:  "[2/3] Réaliser sa propre physique pour du Pixel Art"
+title:  "[3/3] Réaliser sa propre physique pour du Pixel Art"
+published: false
 ---
 
-## Les acteurs
+## Les Solides
 
-Dans le précédent article, j'ai plusieurs fois parler d'Acteur, en fait un Acteur désigne une entité qui va se déplacer dans la scène
-tout en collisionant avec les autres boîtes de collisions. Par exemple Mario serait un Acteur, un Goomba aussi.
+Maintenant que nous en avons terminé avec les Acteurs, il est temps de s'attaquer au deuxième type d'entité : les Solides.
+Ce que j'appelle un Solide, c'est une entité qui se déplace de façon impartiale, sans prendre en compte sans environnement.
+La seule chose qu'un Solide fait, c'est de pousser les Acteurs sur son chemin, on alors de déplacer les Acteurs avec lui s'ils remplissent certaines conditions
+Dans le cas d'un platformer ces conditions seraient simple :
+- L'Acteur touche le Solide
+- L'Acteur est au dessus du Solide
+Ce qui se traduit par "L'Acteur est posé sur le Solide", dans ce cas, le Solide doit déplacer l'Acteur avec lui
 {: .text-justify}
 
 Personnellement je crée une class abstraite que j'appelle Actor. Abstraite signifie qu'elle ne peux pas être utiliser comme ça, il
@@ -65,8 +71,7 @@ Cette dernière fonction simule chaque pixel un par un au lieu de les faire en m
 Cela permet de calculer les positions entre le point de départ et celui d'arrivée.
 Le principe est simple, pour chaque déplacement d'un pixel, on regarde si l'on va collisioner un objet à la "position voulue".
 Si oui on ne bouge pas, si non on déplace le transform du joueur.
-Si l'on collisione, alors on quitte la fonction, et on remet à zéro le remainder afin d'éviter d'accumuler de la vitesse.
-L'opération est répétée pour chaque pixel (sauf s'il y a eu collision).
+L'opération est repétée pour chaque pixel.
 {: .text-justify}
 ```csharp
 private void PixelMoveX (int amount)
@@ -84,7 +89,6 @@ private void PixelMoveX (int amount)
 		else
 		{
 			// Collision !
-			remainder.x = 0;
 			break;
 		}
 	}
@@ -180,7 +184,6 @@ public abstract class Actor : MonoBehaviour
 			else
 			{
 				// Collision !
-				remainder.x = 0;
 				break;
 			}
 		}
@@ -201,7 +204,6 @@ public abstract class Actor : MonoBehaviour
 			else
 			{
 				// Collision !
-				remainder.y = 0;
 				break;
 			}
 		}
