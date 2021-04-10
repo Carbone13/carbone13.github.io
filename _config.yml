@@ -17,7 +17,7 @@ timezone: Europe/Paris
 
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
 # --------------------------
-title: Carbone_13                        # the main title
+title: 'Carbone_13 | Blog'                        # the main title
 
 tagline: Fait mu-muse avec des pixels   # it will display as the sub-title
 

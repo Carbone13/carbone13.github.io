@@ -9,8 +9,8 @@ post:
   relate_posts: Autres articles
   share: Partager
   button:
-    next: Nouveau
-    previous: Ancien
+    next: Suivant
+    previous: Précédent
 
 search_hint: Rechercher   # text show on search bar
 
