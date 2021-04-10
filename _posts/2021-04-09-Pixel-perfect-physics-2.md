@@ -4,7 +4,9 @@ categories: 2D Physic
 title:  "[2/3] Réaliser sa propre physique pour du Pixel Art"
 ---
 
-## Les acteurs
+# [2/3]  Les Acteurs
+
+---
 
 Dans le précédent article, j'ai plusieurs fois parler d'Acteur, en fait un Acteur désigne une entité qui va se déplacer dans la scène
 tout en collisionant avec les autres boîtes de collisions. Par exemple Mario serait un Acteur, un Goomba aussi.
@@ -15,7 +17,10 @@ faut forcément crée une deuxième classe qui en dérive pour l'utiliser. Le bu
 que tout les classes qui en hérite pourront utiliser.
 {: .text-justify}
 
-# Se déplacer pixel par pixel
+## Se déplacer pixel par pixel
+
+---
+
 Pour que nos Acteurs se déplacent pixel par pixel, il faut stocker le mouvement de ce dernier, est dès lors qu'il est d'au moins 1 pixel,
 on déplace réellement le joueur dans la scène. Chaque Acteur possède donc une variable de type Vector2 que j'appelle remainder qui stock donc
 les déplacements, elle est public mais je la cache dans l'éditeur grâce à HideInInspector. Ensuite les Acteur possèdent une fonction `Move()` qui prend en paramètre un Vector2 qui représente la distance à parcourir. Les deux autres arguments sont des callbacks qui sont appelé lorsqu'il y a une collision. Ils sont de type Action.
@@ -234,6 +239,9 @@ public abstract class Actor : MonoBehaviour
 }
 ```
 
+## En situation réelle
+---
+
 N'oubliez pas qu'Actor est un classe abstraite, il faut forcément crée une classe qui en dérive pour l'utiliser.
 Voici une classe Player basique pour vous montrer comment l'utiliser :
 {: .text-justify}
@@ -262,5 +270,6 @@ et par Delta Time (voir futur article sur le delta time).
 Quant aux callbacks, je ne souhaite pas les utiliser alors je passe un callback null.
 Si vous calculer vous même votre velocity, il est préférable de le remettre à 0 sur l'axe correspondant à la même manière que le remainder.
 {: .text-justify}
-Résultat final sur Unity :
+
+## Résultat final sur Unity
 ![Héléna qui coure dans tout les sens](/assets/pixelartphysic/actortest.gif)

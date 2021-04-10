@@ -5,11 +5,11 @@ title:  "[3/3] Réaliser sa propre physique pour du Pixel Art"
 published: true
 ---
 
-# Les Solides
+# [3/3]  Les Solides
+
 ---
 
 Maintenant que nous en avons terminé avec les Acteurs, il est temps de s'attaquer au deuxième type d'entité : les Solides.
-{: .text-justify}
 Ce que j'appelle un Solide, c'est une entité qui se déplace de façon impartiale, sans prendre en compte sans environnement.
 {: .text-justify}
 La seule chose qu'un Solide fait, c'est de pousser les Acteurs sur son chemin, on alors de déplacer les Acteurs avec lui s'ils remplissent certaines conditions
@@ -32,6 +32,7 @@ public abstract class Solid : MonoBehaviour
 ```
 
 ## Préparation des acteurs
+
 ---
 
 Comme dit plus haut, les Acteurs doivent pouvoir vérifier s'il "chevauche" un Solide, pour que ce dernier sache s'il doit le déplacement avec lui.
@@ -44,8 +45,8 @@ public abstract bool IsRiding (Solid solid);
 ```
 
 Une fois cela fait, Unity nous indique que notre classe Player ne peut pas compiler car elle n'implémente par `IsRiding()`, c'est ce que nous allons faire.
-Il va falloir ajouter cette fameuse fonction dans notre Player, en utilisant le keyword
-{: .text-justify} `override`
+Il va falloir ajouter cette fameuse fonction dans notre Player, en utilisant le keyword `override`.
+{: .text-justify}
 ```csharp
 public override bool IsRiding (Solid solid)
 {
@@ -91,6 +92,9 @@ public override void Squish ()
 Vous pouvez mettre ce que vous voulez dans cette fonction, généralement soit tuer le joueur ou alors le pousser pour l'extraire.
 
 ## Petit ajout au Trackeur
+
+---
+
 Pour que nous Solide puisse récupérer les Acteurs qui le chevauche, il faut déjà accéder à tout les acteurs de la scène, pour se faire nous allons rajouter une Liste à notre Tracker qui stockera des Acteurs.
 {: .text-justify}
 ```csharp
@@ -110,6 +114,9 @@ public void OnDisable ()
 ```
 
 ## Les choses sérieuses
+
+---
+
 Maintenant que nous avons préparé nos Acteurs, retournons à notre classe Solid.
 De la même façon que les Acteurs, pour se déplacer il va lui falloir un Vector2 en guise de remainder et une fonction `Move()`. Cette dernière est quasiment identique à celle de la classe Actor. Juste avant il va nous falloir un moyen de récupérer chaque Acteur qui nous chevauche, on va ajouter un HashSet d'Acteur, c'est similaire à une Liste mais chaque élement ne peut apparaître qu'une seule fois, et c'est bien plus performant qu'une Liste pour récuperer des éléments à chaque frames.
 {: .text-justify}
@@ -377,5 +384,5 @@ public class MovingPlatform : Solid
 }
 ```
 
-Résultat final sur Unity :
+## Résultat final sur Unity
 ![Helena se fait brutaliser par un solide](/assets/pixelartphysic/solid.gif)
