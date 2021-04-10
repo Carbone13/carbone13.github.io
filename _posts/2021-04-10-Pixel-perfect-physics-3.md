@@ -9,9 +9,12 @@ published: true
 ---
 
 Maintenant que nous en avons terminé avec les Acteurs, il est temps de s'attaquer au deuxième type d'entité : les Solides.
+{: .text-justify}
 Ce que j'appelle un Solide, c'est une entité qui se déplace de façon impartiale, sans prendre en compte sans environnement.
+{: .text-justify}
 La seule chose qu'un Solide fait, c'est de pousser les Acteurs sur son chemin, on alors de déplacer les Acteurs avec lui s'ils remplissent certaines conditions
 Dans le cas d'un platformer ces conditions seraient simple :
+{: .text-justify}
 - L'Acteur touche le Solide
 - L'Acteur est au dessus du Solide
 Ce qui se traduit par "L'Acteur est posé sur le Solide", dans ce cas, le Solide doit déplacer l'Acteur avec lui.
@@ -32,14 +35,17 @@ public abstract class Solid : MonoBehaviour
 ---
 
 Comme dit plus haut, les Acteurs doivent pouvoir vérifier s'il "chevauche" un Solide, pour que ce dernier sache s'il doit le déplacement avec lui.
+{: .text-justify}
 Nous allons donc ajouter une fonction `IsRiding (Solid solid)` qui retourne une boolean dans notre class `Actor`. Cette fonction utilise le keyword `abstract` cela veut dire que
 chaque classe qui hérite d'Actor va devoir fournir sa propre version de cette fonction
+{: .text-justify}
 ```csharp
 public abstract bool IsRiding (Solid solid);
 ```
 
 Une fois cela fait, Unity nous indique que notre classe Player ne peut pas compiler car elle n'implémente par `IsRiding()`, c'est ce que nous allons faire.
-Il va falloir ajouter cette fameuse fonction dans notre Player, en utilisant le keyword `override`
+Il va falloir ajouter cette fameuse fonction dans notre Player, en utilisant le keyword
+{: .text-justify} `override`
 ```csharp
 public override bool IsRiding (Solid solid)
 {
@@ -69,8 +75,8 @@ public override bool IsRiding (Solid solid)
 ```
 
 Enfin, nous allons ajouter de la même manière une fonction `Squish()` à nos Acteurs.
-Cette fonction sera appelé lorsqu'un Solide pousse un Acteur dans une autre entité, dans ce cas là
-l'Acteur en question se retrouve alors écrasé entre 2 colliders.
+Cette fonction sera appelé lorsqu'un Solide pousse un Acteur dans une autre entité, dans ce cas là l'Acteur en question se retrouve alors écrasé entre 2 colliders.
+{: .text-justify}
 ```csharp
 public abstract void Squish ();
 ```
@@ -86,6 +92,7 @@ Vous pouvez mettre ce que vous voulez dans cette fonction, généralement soit t
 
 ## Petit ajout au Trackeur
 Pour que nous Solide puisse récupérer les Acteurs qui le chevauche, il faut déjà accéder à tout les acteurs de la scène, pour se faire nous allons rajouter une Liste à notre Tracker qui stockera des Acteurs.
+{: .text-justify}
 ```csharp
 public static List<Actor> actors = new List<Actor>();
 ```
@@ -105,11 +112,13 @@ public void OnDisable ()
 ## Les choses sérieuses
 Maintenant que nous avons préparé nos Acteurs, retournons à notre classe Solid.
 De la même façon que les Acteurs, pour se déplacer il va lui falloir un Vector2 en guise de remainder et une fonction `Move()`. Cette dernière est quasiment identique à celle de la classe Actor. Juste avant il va nous falloir un moyen de récupérer chaque Acteur qui nous chevauche, on va ajouter un HashSet d'Acteur, c'est similaire à une Liste mais chaque élement ne peut apparaître qu'une seule fois, et c'est bien plus performant qu'une Liste pour récuperer des éléments à chaque frames.
+{: .text-justify}
 ```csharp
 public HashSet<Actor> riders = new HashSet<Actor>();
 ```
 
 La fonction qui va permettre de la mettre à jour est simple, on loop à travers chaque Actor, on vérifie s'il nous chevauche d'après sa méthode `IsRiding()`, si c'est le cas on l'ajoute à notre HashSet.
+{: .text-justify}
 ```csharp
 private void GetRiders ()
 {
@@ -127,6 +136,7 @@ private void GetRiders ()
 
 Maintenant venons-en à la fonction Move(), comme je l'ai dit elle est quasiment identique à celle d'un Acteur, on commence déja par récupérer les acteurs nous chevauchant via GetRiders(), on désactive notre collider pour éviter de coincer les Acteurs en nous, on calcule le remainder comme sur un Acteur et enfin on réactive notre collider.
 (Je continue de seulement détailler MoveX, le code complet est à la fin de l'article)
+{: .text-justify}
 ```csharp
 protected void Move (Vector2 amount)
 {
@@ -155,6 +165,7 @@ private void MoveX (float amount)
 
 Pour finir PixelMove() est un peu différente, nous n'avons pas besoin de vérifier de collision car comme dit en introduction, les solides ont un mouvement impartiales, ils sont garantis d'arriver à la position voulues. Nous allons donc commencer par déplacer notre transform.
 Ensuite on loop à travers chaque Acteur. Il y a deux cas de figure:
+{: .text-justify}
 - Soit on collide avec cet Acteur (une fois notre transform déplacée)
 	--> Il faut pousser cet Acteur pour qu'il ne collide plus avec nous.
 - Soit cet acteur nous chevauche.
@@ -162,6 +173,7 @@ Ensuite on loop à travers chaque Acteur. Il y a deux cas de figure:
 
 Pousser l'acteur pour le sortir de notre boîte de collision consiste à le "snapper" au bord de notre collider en fonction de la direction dans laquelle nous allons. Pour se faire on le déplace de la différence entre nos 2 bords. Le callback est Squish, car si on se déplacant l'Acteur touche quelque chose, c'est qu'il est coincé entre nous et ce quelque chose.
 Lui appliquer le même mouvement consiste à appeller sa fontion `PixelMove` avec comme argument `amount`.
+{: .text-justify}
 ```csharp
 private void PixelMoveX (int amount)
 {
@@ -187,7 +199,7 @@ private void PixelMoveX (int amount)
 ```
 À savoir qu'un Acteur ne peut pas subir les deux cas de figures en même temps
 S'il nous chevauche et nous pénètre à la même frame, il est poussé (cas n°1).
-
+{: .text-justify}
 La classe Solid complète :
 ```csharp
 using System.Collections.Generic;
@@ -299,6 +311,7 @@ public abstract class Solid : MonoBehaviour
 
 Pour utiliser cette class je vous propose de réaliser des plateformes qui se déplacent
 Vu que ce n'est pas le but du tutoriel et que l'utilisation est la même qu'avec Actor, voici un script réalisé par Sebastian Lague :
+{: .text-justify}
 ```csharp
 public class MovingPlatform : Solid
 {
