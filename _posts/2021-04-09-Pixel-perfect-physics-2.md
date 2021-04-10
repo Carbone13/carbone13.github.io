@@ -8,17 +8,19 @@ title:  "[2/3] Réaliser sa propre physique pour du Pixel Art"
 
 Dans le précédent article, j'ai plusieurs fois parler d'Acteur, en fait un Acteur désigne une entité qui va se déplacer dans la scène
 tout en collisionant avec les autres boîtes de collisions. Par exemple Mario serait un Acteur, un Goomba aussi.
+{: .text-justify}
 
 Personnellement je crée une class abstraite que j'appelle Actor. Abstraite signifie qu'elle ne peux pas être utiliser comme ça, il
 faut forcément crée une deuxième classe qui en dérive pour l'utiliser. Le but ensuite, c'est de crée des fonctions dans la classe Actor
 que tout les classes qui en hérite pourront utiliser.
-
+{: .text-justify}
 
 # Se déplacer pixel par pixel
 Pour que nos Acteurs se déplacent pixel par pixel, il faut stocker le mouvement de ce dernier, est dès lors qu'il est d'au moins 1 pixel,
 on déplace réellement le joueur dans la scène. Chaque Acteur possède donc une variable de type Vector2 que j'appelle remainder qui stock donc
 les déplacements. Ensuite les Acteur possèdent une fonction `Move()` qui prend en paramètre un Vector2 qui représente la distance à parcourir.
 Aussi il est important que chaque Acteur possède une boîte de collision
+{: .text-justify}
 ```csharp
 public abstract class Actor : MonoBehaviour
 {
@@ -41,6 +43,7 @@ public abstract class Actor : MonoBehaviour
 Ensuite chaque mouvement est divisé en 2 phase, on s'occupe d'abord de déplacement horizontalement le joueur, puis verticalement, axe par axe.
 Ces deux fonctions sont les mêmes, alors pour le tutoriel je ne vais en détailler qu'une seul (les deux fonctions seront tout de même disponible à la fin de l'article).
 Le principe est simple, déjà on vérifie que la distance à bouger n'est pas de zéro, si c'est n'est pas le cas, on l'ajoute dans notre remainder, on va ensuite arrondir le remainder à l'entier le plus proche. Si la valeur arrondie n'est pas zéro, alors on doit déplacer notre joueur d'un certain nombre de pixel. Noter que cette valeur peux être négative.
+{: .text-justify}
 ```csharp
 private void MoveX (float amount)
 {
@@ -63,6 +66,7 @@ Cela permet de calculer les positions entre le point de départ et celui d'arriv
 Le principe est simple, pour chaque déplacement d'un pixel, on regarde si l'on va collisioner un objet à la "position voulue".
 Si oui on ne bouge pas, si non on déplace le transform du joueur.
 L'opération est repétée pour chaque pixel.
+{: .text-justify}
 ```csharp
 private void PixelMoveX (int amount)
 {
@@ -92,6 +96,7 @@ Son fonctionnement est simple, elle vérifie chacune des autres boîtes présent
 On vérifie d'abord si collidable est true, et que la boîte n'est pas la notre.
 Puis, si on collisione avec, on la retourne.
 A savoir que la fonction `Overlaps()` provient de la structure RectInt.
+{: .text-justify}
 ```csharp
 private Rectangle First (Vector2 position)
 {
@@ -220,6 +225,7 @@ public abstract class Actor : MonoBehaviour
 
 N'oubliez pas qu'Actor est un classe abstraite, il faut forcément crée une classe qui en dérive pour l'utiliser.
 Voici une classe Player basique pour vous montrer comment l'utiliser :
+{: .text-justify}
 ```csharp
 public class Player : Actor
 {
@@ -238,9 +244,9 @@ public class Player : Actor
 ```
 On dérive d'abord d'Actor, ensuite je déclare une variable MoveSpeed qui correspond à la vitesse du joueur en pixel par seconde.
 Dans une fonction Update je récupère les axes Horizontal et Vertical (qui correspondent aux flèche directionnelle ou à ZQSD).
-
+{: .text-justify}
 Enfin je déplacer mon joueur en fonction de mes touches (que je normalize pour transformer le tout en direction), je multiplie par ma vitesse
 et par Delta Time (voir futur article sur le delta time).
-
+{: .text-justify}
 Résultat final sur Unity :
 ![Héléna qui coure dans tout les sens](/assets/pixelartphysic/actortest.gif)
